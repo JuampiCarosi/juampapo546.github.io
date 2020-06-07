@@ -1,12 +1,49 @@
 <!DOCTYPE html>
-<html lang="en" id="htlm">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="estilos.css" />
     <title>Dibujando con flechas</title>
   </head>
   <body>
-    <canvas width="6999" height="800" id="area_de_dibujo"></canvas>
+    <div class="div">
+      <div class="tools">
+        <button onclick="cambiarColor('red', this)" class="colores">
+          <i class="rojo"></i>
+        </button>
+        <button
+          onclick="cambiarColor('black', this)"
+          class="colores seleccionado"
+        >
+          <i class="negro"></i>
+        </button>
+        <button onclick="cambiarColor('blue', this)" class="colores">
+          <i class="azul"></i>
+        </button>
+        <button onclick="cambiarColor('green', this)" class="colores">
+          <i class="verde"></i>
+        </button>
+        <button onclick="toggleBorrar()" id="borrar">
+          <img src="eraser-solid.svg" alt="" />
+        </button>
+        <button
+          onclick="cambiarTrazo('alzado', this)"
+          class="trazo seleccionado"
+          id="alzado"
+        >
+          <img src="pencil-alt-solid.svg" />
+        </button>
+        <button onclick="cambiarTrazo('recta', this)" class="trazo">
+          <img src="arrows-alt-v-solid.svg" />
+        </button>
+        <input type="number" id="grosor" value="3" />
+      </div>
+      <div class="canvas-container">
+        <canvas id="area_de_dibujo"></canvas>
+      </div>
+    </div>
+
     <p id="demo"></p>
     <script src="eventos2.js"></script>
     <style type="text/css" src="estilos.css"></style>

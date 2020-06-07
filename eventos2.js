@@ -1,25 +1,45 @@
 /*---------- VARIABLES ----------*/
 
 var cuadrito = document.getElementById("area_de_dibujo");
+var grosorInput = document.getElementById("grosor");
 var papel = cuadrito.getContext("2d");
+var botonesColor = document.getElementsByClassName("colores");
+var botonesTrazo = document.getElementsByClassName("trazo");
+var botonBorrar = document.getElementById("borrar");
 var colorcito = "black";
 var draw = 0;
+var initDibujar = {
+  x: undefined,
+  y: undefined,
+  primerClick: false,
+};
 var espacio = 1;
-var opciones = prompt("Flechas o Mouse?");
+var opciones = "mouse";
+var trazo = "alzado";
 var movimiento = 10;
 var grosor = 3;
-var colorzote;
-var teclas = {
-  UP: 38,
-  DOWN: 40,
-  LEFT: 37,
-  RIGHT: 39,
-  SPACE: 32,
-  R: 82,
-  N: 78,
-  A: 65,
-};
+var borrar = false;
+
 /*---------- FUNCIONES ----------*/
+
+function cambiarColor(color, boton) {
+  colorcito = color;
+  if (borrar) toggleBorrar();
+  Array.from(botonesColor).forEach((boton) => {
+    boton.classList.remove("seleccionado");
+  });
+
+  boton.classList.add("seleccionado");
+}
+
+function cambiarTrazo(nuevoTrazo, boton) {
+  trazo = nuevoTrazo;
+  Array.from(botonesTrazo).forEach((boton) => {
+    boton.classList.remove("seleccionado");
+  });
+
+  boton.classList.add("seleccionado");
+}
 
 function dibujarLinea(color, xinicial, yinicial, xfinal, yfinal, lienzo) {
   lienzo.beginPath();
@@ -31,86 +51,49 @@ function dibujarLinea(color, xinicial, yinicial, xfinal, yfinal, lienzo) {
   lienzo.closePath();
 }
 
-function dibujarTeclado(evento) {
-  console.log(evento);
-  if (evento.keyCode == teclas.N) {
-    colorzote = "black";
-  } else if (evento.keyCode == teclas.A) {
-    colorzote = "blue";
-  } else if ((evento.keyCode = teclas.R)) {
-    colorzote = "red";
+function dibujarMouse(evento) {
+  if (opciones !== "mouse" || trazo !== "alzado") return;
+  if (draw == 1) {
+    dibujarLinea(borrar ? "white" : colorcito, x, y, evento.offsetX, evento.offsetY, papel);
   }
-  if (evento.keyCode == teclas.SPACE) {
-    espacio++;
-  }
-  if (espacio % 2 == 0) {
-    colorcito = "white";
-    grosor = 30;
-  } else {
-    colorcito = colorzote;
-    grosor = 3;
-  }
-  if (opciones != "flechas") {
-    reurn;
-  }
-  switch (evento.keyCode) {
-    case teclas.UP:
-      dibujarLinea(colorcito, x, y, x, y - movimiento, papel);
-      y = y - movimiento;
-      break;
-    case teclas.DOWN:
-      dibujarLinea(colorcito, x, y, x, y + movimiento, papel);
-      y = y + movimiento;
-      break;
-    case teclas.LEFT:
-      dibujarLinea(colorcito, x, y, x - movimiento, y, papel);
-      x = x - movimiento;
-      break;
-    case teclas.RIGHT:
-      dibujarLinea(colorcito, x, y, x + movimiento, y, papel);
-      x = x + movimiento;
-      break;
-
-    default:
-  }
+  x = evento.offsetX;
+  y = evento.offsetY;
 }
+
+function toggleBorrar() {
+  borrar = !borrar;
+  grosor = borrar ? 30 : grosorInput.value;
+  botonBorrar.classList.toggle("seleccionado");
+  cambiarTrazo("alzado", document.getElementById("alzado"));
+}
+
 function mouseDown() {
   draw = 1;
 }
-function mouseUp() {
+function mouseUp(evento) {
   draw = 0;
+  if (trazo == "recta") {
+    if (initDibujar.primerClick) {
+      dibujarLinea(colorcito, initDibujar.x, initDibujar.y, evento.offsetX, evento.offsetY, papel);
+      initDibujar.primerClick = false;
+    } else {
+      initDibujar.x = evento.offsetX;
+      initDibujar.y = evento.offsetY;
+      initDibujar.primerClick = true;
+    }
+  }
 }
 /*---------- START ----------*/
+cuadrito.width = cuadrito.offsetWidth;
+cuadrito.height = cuadrito.offsetHeight;
 
-dibujarLinea("black", 0, 0, 0, 800, papel);
-dibujarLinea("black", 0, 0, 6999, 0, papel);
-dibujarLinea("black", 6999, 0, 6999, 800, papel);
-dibujarLinea("black", 0, 800, 6999, 800, papel);
+cuadrito.addEventListener("mousemove", dibujarMouse);
+cuadrito.addEventListener("mouseup", mouseUp);
+cuadrito.addEventListener("mousedown", mouseDown);
 
-if (opciones == "mouse") {
-  function dibujarMouse(evento) {
-    if (draw == 1) {
-      dibujarLinea(colorcito, x, y, evento.offsetX, evento.offsetY, papel);
-    }
-    x = evento.offsetX;
-    y = evento.offsetY;
-  }
-  document.write(
-    " Hace click y move el mouse sobre el recuadro negro para dibujar y apreta espacio pra activar/desactivar el modo borrador, apreta R para rojo, A para azul y N para negro ;) "
-  );
-} else if (opciones == "flechas") {
-  var x = 400;
-  var y = 400;
-  dibujarLinea("red", x - 1, y - 1, x + 1, y + 1, papel);
-  document.write(
-    "Move las flechas de tu teclado para dibujar, apreta espacio para activar el modo borrador/libre y apreta de nuevo para volver a dibujar , apreta R para rojo, A para azul y N para negro"
-  );
-} else {
-  alert("Opcion no valida");
-  location.reload();
-}
+grosorInput.addEventListener("change", (evento) => (grosor = evento.target.value));
 
-document.addEventListener("keydown", dibujarTeclado);
-document.addEventListener("mousemove", dibujarMouse);
-document.addEventListener("mouseup", mouseUp);
-document.addEventListener("mousedown", mouseDown);
+window.addEventListener("resize", () => {
+  cuadrito.width = cuadrito.offsetWidth;
+  cuadrito.height = cuadrito.offsetHeight;
+});
